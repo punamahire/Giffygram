@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "name": "Zoe",
+      "email": "zoeXYZ@gmail.com",
+      "id": 1
+    },
+    {
+      "name": "Punam",
+      "email": "myemail@gmail.com",
+      "id": 2
+    }
+  ],
+  "posts": [
+    {
+        "id": 2,
+        "imageURL": "https://media.giphy.com/media/26xBI73gWquCBBCDe/giphy.gif",
+        "userId": 6,
+        "description": "Proin eu mi. Nulla ac enim. In tempor, turpis nec euismod scelerisque, quam turpis adipiscing lorem, vitae mattis nibh ligula nec sem.\n\nDuis aliquam convallis nunc. Proin at turpis a pede posuere nonummy. Integer non velit.",
+        "timestamp": 1561695022812,
+        "title": "Enhanced global utilisation"
+    }
+],
+  "messages": [],
+  "like": []
+}
