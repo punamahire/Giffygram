@@ -5,6 +5,9 @@
 @import url("https://fonts.googleapis.com/css?family=Comfortaa|Patua+One");
 /*Typography
 --------------------------------------------------------------*/
+.newPost {
+    padding-top: 80px;
+}
 
 body, button, input, select, textarea {
     color: #404040;
@@ -47,3 +50,18 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0 25%;
 }
 
+h3 {
+    text-align: center;
+}
+
+.edit-delete-btns {
+    display: flex;
+}
+
+.post__edit {
+    margin-right: 1em;
+}
+
+.edit_btn, .delete_btn {
+    padding: .25em;
+}
