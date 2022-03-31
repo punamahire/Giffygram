@@ -11,7 +11,9 @@ export const Footer = () => {
                     <option>2020</option>
                     <option>2019</option>
                 </select></span>
-                <span id="postCount"></span>
+                <span id="postCount"></span> &emsp; &emsp; &emsp; &emsp; &emsp;
+                <button type="button" id="myPosts">Show my posts</button> &emsp;
+                <button type="button" id="allPosts">Show all posts</button>
             </div>
         </footer>
     `

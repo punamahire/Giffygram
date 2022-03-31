@@ -1,4 +1,4 @@
-import { getUsers, getPosts, usePostCollection, getLoggedInUser, setLoggedInUser, createPost, deletePost, getSinglePost, updatePost, logoutUser, loginUser, registerUser } from "./data/DataManager.js"
+import { getUsers, getPosts, usePostCollection, getLoggedInUser, setLoggedInUser, createPost, deletePost, getSinglePost, updatePost, logoutUser, loginUser, registerUser, getPostsFromUser } from "./data/DataManager.js"
 import { LoginForm } from "./auth/LoginForm.js"
 import { RegisterForm } from "./auth/RegisterForm.js"
 import { PostList } from "./feed/PostList.js"
@@ -6,22 +6,18 @@ import { PostEntry } from "./feed/PostEntry.js"
 import { PostEdit } from "./feed/postEdit.js"
 import { NavBar } from "./nav/NavBar.js"
 import { Footer } from "./nav/Footer.js"
+import { showMyList } from "./feed/showMyList.js"
 
 const applicationElement = document.querySelector(".giffygram");
+const postElement = document.querySelector(".postList");
+let userViewingMyPosts = false;
 
 applicationElement.addEventListener("click", event => {
-	if (event.target.id === "logout"){
-		console.log("You clicked on logout")
-    logoutUser();
-    console.log(getLoggedInUser());
-    sessionStorage.clear();
-    checkForUser();
-	}
-})
-
-applicationElement.addEventListener("click", event => {
+  
   event.preventDefault();
+
   if (event.target.id === "login__submit") {
+    
     //collect all the details into an object
     const userObject = {
       name: document.querySelector("input[name='name']").value,
@@ -33,63 +29,41 @@ applicationElement.addEventListener("click", event => {
         sessionStorage.setItem("user", JSON.stringify(dbUserObj));
         startGiffyGram();
       }else {
+        console.log("User does not exist");
         //got a false value - no user
         const entryElement = document.querySelector(".entryForm");
-        entryElement.innerHTML = `<p class="center">That user does not exist. Please try again or register for your free account.</p> ${LoginForm()} <hr/> <hr/> ${RegisterForm()}`;
+        entryElement.innerHTML = `<p class="center">That user does not exist. 
+        Please try again or register for your free account.</p> ${LoginForm()} <hr/> <hr/> ${RegisterForm()}`;
       }
     })
   }
-})
 
-applicationElement.addEventListener("click", event => {
-  event.preventDefault();
   if (event.target.id === "register__submit") {
+    
     //collect all the details into an object
     const userObject = {
       name: document.querySelector("input[name='registerName']").value,
       email: document.querySelector("input[name='registerEmail']").value
     }
-    registerUser(userObject)
+
+    // When a user registers, ensure that the user is not already in the DB, no duplicates
+    loginUser(userObject)
     .then(dbUserObj => {
-      sessionStorage.setItem("user", JSON.stringify(dbUserObj));
-      startGiffyGram();
+      if(dbUserObj){
+        sessionStorage.setItem("user", JSON.stringify(dbUserObj));
+        startGiffyGram();
+      }else {
+        registerUser(userObject)
+        .then(dbUserObj => {
+          sessionStorage.setItem("user", JSON.stringify(dbUserObj));
+          startGiffyGram();
+        })
+      }
     })
-  }
-})
+  } 
 
-applicationElement.addEventListener("change", event => {
-    if (event.target.id === "yearSelection") {
-      const yearAsNumber = parseInt(event.target.value)
-      console.log(`User wants to see posts since ${yearAsNumber}`)
-      //invoke a filter function passing the year as an argument
-      showFilteredPosts(yearAsNumber);
-    }
-})
+  if (event.target.id === "newPost__submit") {
 
-applicationElement.addEventListener("click", event => {
-	if (event.target.id === "directMessageIcon"){
-		alert("You clicked on pen to edit")
-	}
-})
-
-applicationElement.addEventListener("click", event => {
-	if (event.target.id === "logo-icon"){
-		alert("Do you want to go to home page?")
-	}
-})
-
-applicationElement.addEventListener("click", event => {
-    if (event.target.id === "newPost__cancel") {
-        //clear the input fields
-        document.querySelector("input[name='postTitle']").value = ""
-        document.querySelector("input[name='postURL']").value = ""
-        document.querySelector("textarea[name='postDescription']").value = ""
-    }
-})
-
-applicationElement.addEventListener("click", event => {
-    event.preventDefault();
-    if (event.target.id === "newPost__submit") {
     //collect the input values into an object to post to the DB
       const title = document.querySelector("input[name='postTitle']").value
       const url = document.querySelector("input[name='postURL']").value
@@ -104,26 +78,35 @@ applicationElement.addEventListener("click", event => {
           timestamp: Date.now()
       }
   
-    // be sure to import from the DataManager
-        createPost(postObject)
-        .then(showPostList())
-    }
-})
+      // be sure to import from the DataManager
+      createPost(postObject)
+      .then(response => {
 
-applicationElement.addEventListener("click", event => {
-    event.preventDefault();
+        showPostList()
+
+        document.querySelector("input[name='postTitle']").value = ""
+        document.querySelector("input[name='postURL']").value = ""
+        document.querySelector("textarea[name='postDescription']").value = ""
+      })
+  }
 
     if (event.target.id.startsWith("delete")) {
-        const postId = parseInt(event.target.id.split("__")[1])
-        deletePost(postId)
-        .then(response => {
-            showPostList()
-        })
-    }
-})
+      
+      const postId = parseInt(event.target.id.split("__")[1])
+      deletePost(postId)
+      .then(response => {
 
-applicationElement.addEventListener("click", event => {
-    event.preventDefault();
+          if (userViewingMyPosts) {
+              getPostsFromUser(parseInt(getLoggedInUser().id))
+              .then(filteredPosts => {
+                postElement.innerHTML = showMyList(filteredPosts);
+            })
+          } else {
+              showPostList(); 
+          }
+      })
+    }
+
     if (event.target.id.startsWith("edit")) {
       const postId = event.target.id.split("__")[1];
       getSinglePost(postId)
@@ -131,11 +114,9 @@ applicationElement.addEventListener("click", event => {
           showEdit(response);
         })
     }
-  })
 
-applicationElement.addEventListener("click", event => {
-    event.preventDefault();
     if (event.target.id.startsWith("updatePost")) {
+      
       const postId = event.target.id.split("__")[1];
       //collect all the details into an object
       const title = document.querySelector("input[name='postTitle']").value
@@ -155,34 +136,97 @@ applicationElement.addEventListener("click", event => {
       updatePost(postObject)
         .then(response => {
             // show updated list of posts
-            showPostList(); 
+            if (userViewingMyPosts) {
+              getPostsFromUser(parseInt(getLoggedInUser().id))
+              .then(filteredPosts => {
+                postElement.innerHTML = showMyList(filteredPosts);
+              })
+            } else {
+              showPostList(); 
+            }
+  
             // replace the edit form with new post entry form
             showPostEntry()
         })
     }
-  })
+})
+
+applicationElement.addEventListener("change", event => {
+    if (event.target.id === "yearSelection") {
+      
+      const yearAsNumber = parseInt(event.target.value)
+      //invoke a filter function passing the year as an argument
+      showFilteredPosts(yearAsNumber);
+    }
+})
+
+applicationElement.addEventListener("click", event => {
+
+    if (event.target.id === "myPosts") {
+      
+      console.log("inside if for myPosts");
+
+      getPostsFromUser(parseInt(getLoggedInUser().id))
+      .then(filteredPosts => {
+        console.log(filteredPosts);
+        postElement.innerHTML = showMyList(filteredPosts);
+        userViewingMyPosts = true;
+      })
+    }
+
+    if (event.target.id === "allPosts") {
+        showPostList();
+    }
+
+    if (event.target.id === "newPost__cancel") {
+        
+        //clear the input fields
+        document.querySelector("input[name='postTitle']").value = ""
+        document.querySelector("input[name='postURL']").value = ""
+        document.querySelector("textarea[name='postDescription']").value = ""
+    }
+
+    if (event.target.id === "logout"){
+        
+        logoutUser();
+        console.log(getLoggedInUser());
+        sessionStorage.clear();
+        checkForUser();
+    }
+
+    if (event.target.id === "directMessageIcon"){
+        alert("You clicked on pen to edit")
+    }
+  
+    if (event.target.id === "logo-icon"){
+        alert("Do you want to go to home page?")
+    }
+})
 
 const showEdit = (postObj) => {
-const entryElement = document.querySelector(".entryForm");
-entryElement.innerHTML = PostEdit(postObj);
+   
+    const entryElement = document.querySelector(".entryForm");
+    entryElement.innerHTML = PostEdit(postObj);
 }
 
 const showPostEntry = () => { 
-    //Get a reference to the location on the DOM where the nav will display
+    
+    // Get a reference to the location on the DOM where the nav will display
     const entryElement = document.querySelector(".entryForm");
     entryElement.innerHTML = PostEntry();
 }
 
 const showFilteredPosts = (year) => {
-    //get a copy of the post collection
+    
     const epoch = Date.parse(`01/01/${year}`);
+    //get a copy of the post collection
     //filter the data
     const filteredData = usePostCollection().filter(singlePost => {
       if (singlePost.timestamp >= epoch) {
         return singlePost
       }
     })
-    const postElement = document.querySelector(".postList");
+    
     postElement.innerHTML = PostList(filteredData);
 
     const numOfPosts = filteredData.length
@@ -191,27 +235,29 @@ const showFilteredPosts = (year) => {
 }
 
 const showFooterContent = () => {
+    
     const entryElement = document.querySelector(".footer__item");
     entryElement.innerHTML = Footer();
 }
 
 const showPostList = () => {
-	//Get a reference to the location on the DOM where the list will display
-	const postElement = document.querySelector(".postList");
-	getPosts().then((allPosts) => {
-		postElement.innerHTML = PostList(allPosts);
+	
+    //Get a reference to the location on the DOM where the list will display
+	  getPosts().then((allPosts) => {
+		  postElement.innerHTML = PostList(allPosts);
 	})
 }
 
 const showNavBar = () => {
+    
     //Get a reference to the location on the DOM where the nav will display
     const navElement = document.querySelector("nav");
-	navElement.innerHTML = NavBar();
+	  navElement.innerHTML = NavBar();
 }
 
 const startGiffyGram = () => {
-    const postElement = document.querySelector(".postList");
-	postElement.innerHTML = "Hello Cohort 55"
+	  
+    postElement.innerHTML = "Hello Cohort 55"
     showNavBar();
     showFooterContent();
     showPostEntry();
@@ -219,6 +265,7 @@ const startGiffyGram = () => {
 }
 
 const checkForUser = () => {
+  
   if (sessionStorage.getItem("user")){
     setLoggedInUser(JSON.parse(sessionStorage.getItem("user")));
     startGiffyGram();
@@ -229,17 +276,17 @@ const checkForUser = () => {
 }
 
 const showLoginRegister = () => {
+  
   showNavBar();
   const entryElement = document.querySelector(".entryForm");
   //template strings can be used here too
   entryElement.innerHTML = `${LoginForm()} <hr/> <hr/> ${RegisterForm()}`;
   //make sure the post list is cleared out too
-  const postElement = document.querySelector(".postList");
   postElement.innerHTML = "";
 }
 
-// Are you defining the function here or invoking it?
 checkForUser();
+
 
 
 

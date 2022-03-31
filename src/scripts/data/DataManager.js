@@ -66,11 +66,19 @@ export const getPosts = () => {
 
     const userId = getLoggedInUser().id
     //return fetch("http://localhost:8088/posts?_sort=timestamp&_order=desc")
-    return fetch("http://localhost:8088/posts?_expand=userId")
+    return fetch("http://localhost:8088/posts?_expand=user&_sort=timestamp&_order=desc")
     .then(response => response.json())
     .then(parsedResponse => {
-        console.log("data with user", parsedResponse)
         postCollection = parsedResponse
+        return parsedResponse;
+    })
+}
+
+export const getPostsFromUser = (userID) => {
+
+    return fetch(`http://localhost:8088/posts?userId=${userID}&_sort=timestamp&_order=desc`)
+    .then(response => response.json())
+    .then(parsedResponse => {
         return parsedResponse;
     })
 }

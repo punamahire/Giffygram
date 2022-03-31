@@ -14,6 +14,16 @@
       "name": "xyz",
       "email": "xyz@gmail.com",
       "id": 3
+    },
+    {
+      "name": "Punam Ahire",
+      "email": "punam@gmail.com",
+      "id": 4
+    },
+    {
+      "name": "abc",
+      "email": "abc@gmail.com",
+      "id": 5
     }
   ],
   "posts": [
@@ -29,7 +39,7 @@
       "title": "Get some laughter",
       "imageURL": "https://media.giphy.com/media/3ohfFzB7vjT48g7pT2/giphy.gif",
       "description": "An inside joke.",
-      "userId": 1,
+      "userId": 2,
       "timestamp": 1647451517631,
       "id": 4
     },
@@ -44,8 +54,8 @@
     {
       "title": "Minions laughing out loud",
       "imageURL": "https://media.giphy.com/media/ZqlvCTNHpqrio/giphy.gif",
-      "description": "hahahahahhaa",
-      "userId": 1,
+      "description": "hahahah...funny",
+      "userId": 3,
       "timestamp": 1648493685178,
       "id": 7
     },
@@ -56,6 +66,30 @@
       "userId": 1,
       "timestamp": 1561695022812,
       "id": 2
+    },
+    {
+      "title": "Good one!",
+      "imageURL": "https://media.giphy.com/media/GgrMkQeKaZkUbZFkSC/giphy.gif",
+      "description": "Its soooooooo funny.",
+      "userId": 4,
+      "timestamp": 1648653024282,
+      "id": 8
+    },
+    {
+      "title": "Tom & Jerry",
+      "imageURL": "https://media.giphy.com/media/fUYhyT9IjftxrxJXcE/giphy.gif",
+      "description": "Having fun to see Tom in trouble!",
+      "userId": 2,
+      "timestamp": 1648653616630,
+      "id": 9
+    },
+    {
+      "title": "Strong baby",
+      "imageURL": "https://media.giphy.com/media/LFiOdYoOlEKac/giphy-downsized-large.gif",
+      "description": "Wooooaaahh, m the winner!!!",
+      "userId": 3,
+      "timestamp": 1648653837956,
+      "id": 10
     }
   ],
   "messages": [],

@@ -18,7 +18,7 @@ body, button, input, select, textarea {
     margin: 0;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5 {
     font-family: "Patua One", serif;
     letter-spacing: 2px;
 }
@@ -64,4 +64,9 @@ h3 {
 
 .edit_btn, .delete_btn {
     padding: .25em;
+}
+
+.giffygram {
+    margin-top: 100px;
+    margin-bottom: 100px;
 }
